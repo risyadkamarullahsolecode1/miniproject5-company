@@ -167,7 +167,7 @@ const EmployeeSearch = () => {
                   <br />
                   <strong>Employment Type:</strong> {employee.employeetype}
                   <br />
-                  <strong>Last Updated Date:</strong> {employee.lastupdateddate}
+                  <strong>Last Updated Date:</strong> {new Date(employee.lastupdateddate).toLocaleString()}
                 </Card.Text>
                 <Link to={`/employees/${employee.empNo}`}>
                   <Button variant="primary">View Details</Button>

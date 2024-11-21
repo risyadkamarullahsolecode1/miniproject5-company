@@ -4,20 +4,20 @@ const getAll = async (params) => {
     return await apiClient.get("/Project", { params });
 };
 
-const get = async (projno) => {
-    return await apiClient.get(`/Project/${projno}`);
+const get = async (projNo) => {
+    return await apiClient.get(`/Project/${projNo}`);
 };
 
 const create = async (data) => {
     return await apiClient.post("/Project", data);
 };
 
-const update = async (projno, data) => {
-    return await apiClient.put(`/Project/${projno}`, data);
+const update = async (projNo, data) => {
+    return await apiClient.put(`/Project/${projNo}`, data);
 };
 
-const remove = async (projno) => {
-    return await apiClient.delete(`/Project/${projno}`);
+const remove = async (projNo) => {
+    return await apiClient.delete(`/Project/${projNo}`);
 };
 
 const getDepartment = async (projno) => {

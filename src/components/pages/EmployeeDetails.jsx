@@ -26,9 +26,11 @@ const EmployeeDetails = () => {
     const fetchDependents = async () => {
         try {
             const response = await DependantService.getDependentsByEmployee(empNo);
+            console.log('Dependents response:', response.data); // Log the data here
             setDependants(response.data);
         } catch (error) {
             console.error('Failed to fetch dependents:', error);
+            setError('Failed to fetch dependents.');
         }
     };
 
@@ -79,7 +81,7 @@ const EmployeeDetails = () => {
         </Card>
 
         <h3>Dependents</h3>
-            <DependentTable dependants={dependants} />
+            <DependentTable dependents={dependants} />
         </Container>
     );
 };

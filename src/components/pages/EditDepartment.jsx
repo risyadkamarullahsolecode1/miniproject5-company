@@ -5,7 +5,7 @@ import DepartmentForm from '../organisms/DepartmentForm';
 import { Container, Alert, Spinner } from 'react-bootstrap';
 
 const EditDepartment = () => {
-    const { id } = useParams(); // Extract the department number from the URL
+    const { deptNo } = useParams(); // Extract the department number from the URL
     const navigate = useNavigate();
     const [department, setDepartment] = useState(null);
     const [error, setError] = useState(null);
@@ -15,8 +15,8 @@ const EditDepartment = () => {
         // Fetch department details on component mount
         const fetchDepartment = async () => {
             try {
-                console.log("Fetching department with ID:", id);
-                const response = await DepartmentService.get(id);
+                console.log("Fetching department with ID:", deptNo);
+                const response = await DepartmentService.get(deptNo);
                 setDepartment(response.data); // Populate department state
             } catch (err) {
                 setError("Failed to fetch department data.");
@@ -26,18 +26,18 @@ const EditDepartment = () => {
             }
         };
 
-        if (id) {
+        if (deptNo) {
             fetchDepartment();
         } else {
             setError("Invalid department ID.");
             setIsLoading(false);
         }
-    }, [id]);
+    }, [deptNo]);
 
     const handleSubmit = async (updatedData) => {
         try {
             console.log("Updating department with data:", updatedData);
-            await DepartmentService.update(id, updatedData);
+            await DepartmentService.update(deptNo, updatedData);
             navigate('/departments'); // Redirect to departments list after successful update
         } catch (err) {
             setError("Failed to update department.");

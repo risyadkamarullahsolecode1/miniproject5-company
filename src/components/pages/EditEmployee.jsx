@@ -7,9 +7,7 @@ import { Alert } from 'react-bootstrap';
 const EditEmployee = () => {
     const { empNo } = useParams();
     const navigate = useNavigate();
-    const [employee, setEmployee] = useState(null);
-    const [error, setError] = useState(null);
-    console.log("deptNo:", empNo); 
+    
     useEffect(() => {
         const fetchEmployee = async () => {
             try {
