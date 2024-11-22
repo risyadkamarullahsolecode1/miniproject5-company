@@ -4,128 +4,168 @@ import EmployeeTable from '../organisms/EmployeeTable';
 import Button from '../atoms/Button';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Col, Dropdown, Row } from 'react-bootstrap';
+import { Col, Dropdown, Row, Container, InputGroup, Form } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import ReactPaginate from 'react-paginate';
 import '../styling/pagination.css';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+
+export const fetchEmployees = async ({ page, pageSize, searchQuery, sortField, sortOrder, level, status }) => {
+    const { data } = await EmployeeService.search({
+      PageNumber: page,
+      PageSize: pageSize,
+      Keyword: searchQuery,
+      SortBy: sortField,
+      SortOrder: sortOrder,
+      Level: level,
+      Status: status, // Include the status parameter
+    });
+    return data;
+};
+  
 
 const EmployeesList = () => {
-    const [employees, setEmployees] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(5);
-    const [totalPages, setTotalPages] = useState(0);
-    const [sortField, setSortField] = useState('Fname');
-    const [sortOrder, setSortOrder] = useState('asc');
-    const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const pageSizes = [5, 10, 15, 20];
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState('Fname');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [level, setLevel] = useState(0);
+  const [status, setStatus] = useState(''); // Empty string means "All"
 
-    const pageSizes = [5, 10, 15, 20];
 
-    const fetchEmployees = async () => {
-        setLoading(true);
-        try {
-            const response = await EmployeeService.search({
-                PageNumber: currentPage,
-                PageSize: pageSize,
-                SortBy: sortField,
-                SortOrder: sortOrder,
-            });
-    
-            console.log("Fetched Employees:", response.data); // Debugging log
-    
-            // Ensure backend response includes totalItems and pageSize
-            const totalItems = response.data.totalItems; // Replace with your actual response field
-            const employeesData = response.data.data; // Employee data array
-            setEmployees(employeesData);
-            setTotalPages(Math.ceil(totalItems / pageSize)); // Correctly calculate total pages
-        } catch (err) {
-            console.error("Error fetching employees:", err);
-            toast.error('Failed to fetch employees.');
-        } finally {
-            setLoading(false);
-        }
-    };
-    
-    const handleSort = (field) => {
-        if (field === sortField) {
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-        } else {
-            setSortField(field);
-            setSortOrder('asc');
-        }
-    };    
+  // React Query for fetching employees
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['employees', page, pageSize, searchQuery, sortField, sortOrder, level, status],
+    queryFn: () => fetchEmployees({ page, pageSize, searchQuery, sortField, sortOrder, level, status }),
+    keepPreviousData: true,
+    placeholderData: keepPreviousData,
+  });
 
-    const getSortIcon = (field) => {
-        if (sortField !== field) return '↕️'; 
-        return sortOrder === 'asc' ? '↑' : '↓'; 
-    };
-    
+  if (isLoading) return <p>Loading...</p>;
+  if (isError) {
+    toast.error('Error fetching employees.');
+    return <p>Error fetching employees.</p>;
+  }
 
-    const handlePageClick = ({ selected }) => {
-        setCurrentPage(selected + 1); 
-    };
+  const pageCount = Math.ceil(data.total / pageSize);
 
-    const handlePageSizeChange = (e) => {
-        setPageSize(Number(e.target.value));
-        setCurrentPage(1); 
-    };
+  const handlePageClick = ({ selected }) => {
+    setPage(selected + 1);
+  };
 
-    useEffect(() => {
-        fetchEmployees();
-    }, [currentPage, pageSize, sortField, sortOrder]);
+  const handlePageSizeChange = (e) => {
+    setPageSize(parseInt(e.target.value));
+    setPage(1);
+  };
 
-    if (loading) return <p>Loading...</p>;
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+    setPage(1); // Reset to the first page
+  };
 
-    return (
-        <div>
-            <h2>Employees</h2>
-            <Row className="mb-2">
-                <Col>
-                    <Button variant="primary" href="/employees/new">Add New Employee</Button>
-                </Col>
-                <Col>
-                    <Link to="/employees/search">
-                        <Button variant="primary" className="mb-3">
-                            <FontAwesomeIcon icon={faMagnifyingGlass} /> Search
-                        </Button>
-                    </Link>
-                </Col>
-            </Row>
-            {/* Dropdown for items per page */}
-            <div className="d-flex align-items-center justify-content-between">
-                <div>
-                    Items per Page:{' '}
-                    <select onChange={handlePageSizeChange} value={pageSize}>
-                        {pageSizes.map((size) => (
-                            <option key={size} value={size}>
-                                {size}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-            {/* Employee Table with Sorting */}
-            <EmployeeTable
-                employees={employees}
-                handleSort={handleSort} // Fix this: Ensure the function is passed correctly
-                getSortIcon={getSortIcon}
+  const handleLevelChange = (e) => {
+    setLevel(parseInt(e.target.value));
+    setPage(1); // Reset to the first page
+  };
+
+  const handleSort = (field) => {
+    if (field === sortField) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const getSortIcon = (field) => {
+    if (sortField !== field) return '↕️';
+    return sortOrder === 'asc' ? '↑' : '↓';
+  };
+
+  const handleStatusChange = (e) => {
+    setStatus(e.target.value);
+    setPage(1); // Reset to the first page
+  };
+
+  return (
+    <Container>
+      <ToastContainer />
+      <h2>Employees</h2>
+
+      {/* Search and Filters */}
+      <Row className="mb-3">
+        <Col md={6}>
+          <InputGroup>
+            <InputGroup.Text>Search</InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Enter keyword..."
+              value={searchQuery}
+              onChange={handleSearch}
             />
+          </InputGroup>
+        </Col>
+        <Col md={3}>
+          <Form.Group controlId="filterLevel">
+            <Form.Label>Filter by Level</Form.Label>
+            <Form.Select value={level} onChange={handleLevelChange}>
+              <option value={0}>All Levels</option>
+              <option value={1}>Level 1</option>
+              <option value={2}>Level 2</option>
+              <option value={3}>Level 3</option>
+              <option value={4}>Level 4</option>
+              <option value={5}>Level 5</option>
+            </Form.Select>
+          </Form.Group>
+        </Col>
+        <Col md={3}>
+            <Form.Group controlId="filterStatus">
+                <Form.Label>Filter by Status</Form.Label>
+                <Form.Select value={status} onChange={handleStatusChange}>
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="notActive">Not Active</option>
+                </Form.Select>
+            </Form.Group>
+        </Col>
+        <Col md={3}>
+          <Form.Group controlId="pageSize">
+            <Form.Label>Items per Page</Form.Label>
+            <Form.Select value={pageSize} onChange={handlePageSizeChange}>
+              {pageSizes.map((size) => (
+                <option key={size} value={size}>
+                  Show {size}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+        </Col>
+      </Row>
 
-            {/* Pagination controls */}
-            <ReactPaginate
-                previousLabel={'Previous'}
-                nextLabel={'Next'}
-                breakLabel={'...'}
-                pageCount={totalPages || 0} // Ensure this is a valid integer
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={3}
-                onPageChange={handlePageClick}
-                containerClassName={'pagination'}
-                activeClassName={'active'}
-            />
-            <ToastContainer />
-        </div>
+      {/* Employee Table */}
+      <EmployeeTable
+        employees={data?.data || []}
+        handleSort={handleSort}
+        getSortIcon={getSortIcon}
+      />
+
+      {/* Pagination */}
+      <ReactPaginate
+        previousLabel="Previous"
+        nextLabel="Next"
+        breakLabel="..."
+        pageCount={pageCount}
+        onPageChange={handlePageClick}
+        containerClassName="pagination"
+        activeClassName="active"
+        marginPagesDisplayed={2}
+        pageRangeDisplayed={3}
+      />
+    </Container>
     );
 };
 

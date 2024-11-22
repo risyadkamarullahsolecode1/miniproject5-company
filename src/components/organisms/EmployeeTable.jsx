@@ -19,6 +19,9 @@ const EmployeeTable = ({ employees = [], handleSort, getSortIcon }) => {
                     <th onClick={() => handleSort('DeptName')} style={{ cursor: 'pointer' }}>
                         Department Name {getSortIcon('DeptName')}
                     </th>
+                    <th onClick={() => handleSort('status')} style={{ cursor: 'pointer' }}>
+                        Status {getSortIcon('status')}
+                    </th>
                     <th onClick={() => handleSort('EmployeeType')} style={{ cursor: 'pointer' }}>
                         Employee Type {getSortIcon('EmployeeType')}
                     </th>

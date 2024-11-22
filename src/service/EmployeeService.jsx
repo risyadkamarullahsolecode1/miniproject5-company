@@ -28,9 +28,17 @@ const deactivate = async (empno, reason) => {
     return await apiClient.put(`/Employee/deactivate/${empno}`, { reason });
 }
 
-const addDependent = async (empno, data) => {
-    return await apiClient.post(`/Employee/employees/${empno}/dependents`,  data);
-}
+const addDependent = async (empNo, data) => {
+    console.log("Calling API with data:", data); // Log the input data
+    try {
+        const response = await apiClient.post(`/Employee/employees/${empNo}/dependents`, data);
+        console.log("API Response:", response.data); // Log API response
+        return response;
+    } catch (error) {
+        console.error("API Error:", error.response || error.message); // Log error
+        throw error;
+    }
+};
 
 const EmployeeService = {
     getAll,

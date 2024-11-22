@@ -10,7 +10,6 @@ import EmployeeDetails from './components/pages/EmployeeDetails';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import DepartmentList from './components/pages/DepartmentList';
 import AddDepartment from './components/pages/AddDepartment';
-import EmployeeSearch from './components/pages/SearchEmployee';
 import ProjectsList from './components/pages/ProjectList';
 import EditProject from './components/pages/EditProject';
 import ProjectDetails from './components/pages/ProjectDetails';
@@ -39,7 +38,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/employees" element={<EmployeesList />} />
-          <Route path="/employees/search" element={<EmployeeSearch />} />
           <Route path="/employees/new" element={<AddEmployee />} />
           <Route path="/employees/:empNo" element={<EmployeeDetails />} />
           <Route path="/employees/edit/:empNo" element={<EditEmployee />} />
@@ -60,7 +58,7 @@ function App() {
           <Route path="/location/:id" element={<LocationDetails />} />
           <Route path="/location/new" element={<AddLocation />} />
           <Route path="/location/edit/:id" element={<EditLocation />} />
-          <Route path="/employees/dependent/:empno" element={<DependentForm />} />
+          <Route path="/employees/dependent/:empNo" element={<DependentForm />} />
         </Routes>
       </Layout>
     </Router>

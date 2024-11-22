@@ -59,7 +59,10 @@ const DepartmentForm = ({ onSubmit, initialData = {} }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData({
+            ...formData,
+            [name]: value === '' ? null : value, // Send null if the field is empty
+        });
     };
 
     const handleSubmit = async (e) => {

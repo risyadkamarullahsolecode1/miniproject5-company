@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useParams } from 'react-router-dom';
-import DependentService from '../../service/DependantService'; // Ensure this service is correctly implemented
+import { useParams, useNavigate } from 'react-router-dom';
 import Button from '../atoms/Button';
 import { Form } from 'react-bootstrap';
+import DependantService from '../../service/DependantService';
+import EmployeeService from '../../service/EmployeeService';
 
 const DependentForm = ({ onDependentAdded }) => {
+    const navigate = useNavigate();
     const { empNo } = useParams(); // Get employee ID from URL
     const [formData, setFormData] = useState({
         name: '',
@@ -16,6 +18,9 @@ const DependentForm = ({ onDependentAdded }) => {
     });
     const [isSubmitting, setIsSubmitting] = useState(false); // Prevent duplicate submissions
 
+    
+    console.log("empNo from URL:", empNo);
+    
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -23,31 +28,30 @@ const DependentForm = ({ onDependentAdded }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Validate employee number
+        console.log("Submitting form with data:", formData);
+    
         if (!empNo) {
-            toast.error('Employee ID is missing. Please check the URL.');
+            console.error("Missing empNo from URL.");
+            toast.error("Employee ID is missing. Please check the URL.");
             return;
         }
-
-        setIsSubmitting(true); // Prevent multiple clicks
+    
         try {
-            // API call to add dependent
-            await DependentService.addDependent(empNo, formData);
-            toast.success('Dependent added successfully!');
-            onDependentAdded(); // Refresh dependents list after adding
-            setFormData({ name: '', sex: '', dob: '', relationship: '' }); // Reset form
+            console.log("Calling DependentService.addDependent...");
+            await EmployeeService.addDependent(empNo, formData);
+            toast.success("Dependent added successfully!");
+            onDependentAdded(); // Optional callback to refresh data
+            setFormData({ name: "", sex: "", dob: "", relationship: "" });
+            navigate(`/employees/${empNo}`); 
         } catch (error) {
-            console.error('Error adding dependent:', error);
+            console.error("Error adding dependent:", error.response || error.message);
             toast.error(
-                error.response?.data?.message ||
-                    'Failed to add dependent. Please try again.'
+                error.response?.data?.message || "Failed to add dependent. Please try again."
             );
-        } finally {
-            setIsSubmitting(false); // Allow form submission again
         }
     };
-
+    
+    
     return (
         <Form onSubmit={handleSubmit}>
             <Form.Group>
@@ -95,12 +99,13 @@ const DependentForm = ({ onDependentAdded }) => {
                 />
             </Form.Group>
             <Button
-                type="submit"
+                type="submit" // Ensure this is explicitly set
                 variant="primary"
-                disabled={isSubmitting} // Disable button while submitting
+                disabled={isSubmitting} // Disable while submitting
             >
                 {isSubmitting ? 'Submitting...' : 'Add Dependent'}
             </Button>
+
         </Form>
     );
 };

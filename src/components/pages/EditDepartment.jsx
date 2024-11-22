@@ -36,14 +36,20 @@ const EditDepartment = () => {
 
     const handleSubmit = async (updatedData) => {
         try {
-            console.log("Updating department with data:", updatedData);
-            await DepartmentService.update(deptNo, updatedData);
-            navigate('/departments'); // Redirect to departments list after successful update
+            const payload = {
+                Deptname: updatedData.deptname,
+                Mgrempno: updatedData.mgrempno,
+                Spvempno: updatedData.spvempno,
+                Location: updatedData.location,
+            };
+            console.log("Updating department with payload:", payload);
+            await DepartmentService.update(deptNo, payload);
+            navigate('/departments');
         } catch (err) {
             setError("Failed to update department.");
             console.error("Error updating department:", err);
         }
-    };
+    };    
 
     if (isLoading) {
         return (
